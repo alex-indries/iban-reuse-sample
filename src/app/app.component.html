@@ -1,37 +1,79 @@
 <div class="d-flex justify-content-center p-4 container-fluid">
-  <div class="col-4 card p-4 shadow-lg mb-5 bg-white rounded">
+  <div class="col-6 card p-4 shadow-lg mb-5 bg-white rounded">
     <p class="h1 m-auto p-3">IBAN REUSE</p>
+    <div class="d-flex justify-content-around">
+      <button
+        (click)="showOptions()"
+        class="btn btn-primary"
+        [disabled]="this.form.controls['withOptions'].value"
+      >
+        Add options
+      </button>
+      <button
+        (click)="showNoOptions()"
+        class="btn btn-primary"
+        [disabled]="!this.form.controls['withOptions'].value"
+      >
+        Remove options
+      </button>
+    </div>
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-      <div class="row-6 mb-3 mt-2">
-        <label class="p-2" for="number">Number of days</label>
-        <input
-          type="number"
-          class="form-control"
-          formControlName="nrOfDays"
-          placeholder="Enter a number of days"
-          min="1"
-        />
-        <p
-          class="text-danger p-2"
-          *ngIf="
-            form.controls['nrOfDays'].invalid &&
-            form.controls['nrOfDays'].touched
-          "
-        >
-          Number of days is required!
-        </p>
-      </div>
-      <div class="container card p-2 mt-3">
-        <p class="h5">Application status!</p>
-        <div class="p-1" *ngFor="let country of countries; let i = index">
+      <div *ngIf="this.form.controls['withOptions'].value" class="container">
+        <div class="row-6 mb-3 mt-2">
+          <label class="p-2" for="number">Number of days</label>
           <input
-            class="form-check-input m-2"
-            type="checkbox"
-            formArrayName="selectedOptions"
-            [value]="country.value"
-            (change)="onCheckboxChange($event)"
+            type="number"
+            class="form-control"
+            formControlName="nrOfDays"
+            placeholder="Enter a number of days"
+            min="1"
           />
-          <label class="form-label m-1">{{ country.name }}</label>
+          <!-- <p
+            class="text-danger p-2"
+            *ngIf="
+              form.controls['nrOfDays'].invalid &&
+              form.controls['nrOfDays'].touched
+            "
+          >
+            Number of days is required!
+          </p> -->
+        </div>
+        <div class="container card p-2 mt-3">
+          <p class="h5">Application status</p>
+          <div
+            class="p-1 d-flex"
+            *ngFor="let appStatus of appStatuses; let i = index"
+          >
+            <input
+              class="form-check-input m-2"
+              type="checkbox"
+              formArrayName="selectedStatus"
+              [value]="appStatus.value"
+              (change)="statusCheckboxHandler($event)"
+            />
+            <label class="form-label m-1">{{ appStatus.name }}</label>
+          </div>
+        </div>
+        <div class="container card p-2 mt-3">
+          <p class="h5">Additional criteria</p>
+          <div
+            class="p-1 d-flex align-items-center"
+            *ngFor="
+              let additionalCriteria of additionalCriterias;
+              let i = index
+            "
+          >
+            <input
+              class="form-check-input m-2"
+              type="checkbox"
+              formArrayName="selectedCriteria"
+              [value]="additionalCriteria.value"
+              (change)="criteriaCheckboxHandler($event)"
+            />
+            <label class="form-label m-1 col">{{
+              additionalCriteria.name
+            }}</label>
+          </div>
         </div>
       </div>
       <div class="mb-3 mt-3">
@@ -42,8 +84,8 @@
           accept=".xlsx, .xls"
           (change)="getFile($event)"
         />
-        <label class="text-warning mt-2"
-          >You can only upload excel files with .xls or .xlsx extensions!</label
+        <label *ngIf="!form.controls['file'].value" class="text-warning mt-2"
+          >You may only upload with .xls or .xlsx extensions!</label
         >
       </div>
       <button class="btn btn-primary" type="submit" [disabled]="form.invalid">
